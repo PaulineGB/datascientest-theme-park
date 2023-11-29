@@ -22,3 +22,8 @@ GET http://localhost:5000/ride
 POST http://localhost:5000/ride  
 GET http://localhost:5000/ride/{id}  
 GET http://localhost:5000/actuator/health/
+
+## Documentation
+
+The project documentation is available on the git repot wiki :  
+https://github.com/PaulineGB/datascientest-theme-park/wiki
