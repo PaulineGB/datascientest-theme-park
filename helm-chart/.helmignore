@@ -22,5 +22,5 @@
 *.tmproj
 .vscode/
 
-# Files from the project
+## Files from the project
 .clusterissuer.yml
