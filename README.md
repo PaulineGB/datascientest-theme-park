@@ -2,6 +2,8 @@
 
 Building a Spring Boot application with github actions 
 
+This is a demo app to pratice DevOps.
+
 # For tech staff
 
 ## Copy the git repo in your machine
