@@ -1,8 +1,8 @@
 # Theme Park Ride
 
-Building a Spring Boot application with github actions 
+Building a Spring Boot application with github actions.  
 
-This is a demo app to pratice DevOps.
+This is a demo app to practice DevOps.
 
 # For tech staff
 
