@@ -1,6 +1,6 @@
 # Theme Park Ride
 
-Building a Spring Boot application in Gitlab-CI or Jenkins
+Building a Spring Boot application with github actions 
 
 # For tech staff
 
@@ -14,6 +14,7 @@ From https :
 
 ## Initialise the docker container
 
+`cd datascientest-theme-park`
 `docker-compose up -d`
 
 ## Check api routes

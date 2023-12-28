@@ -1,7 +1,7 @@
 version: "2"
 services:
   theme-park-ride:
-    image: p0l1na/themeparkride:latest
+    build: ./
     container_name: theme-park-ride
     mem_limit: 512M
     restart: on-failure
