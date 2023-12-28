@@ -14,7 +14,7 @@ From https :
 
 ## Initialise the docker container
 
-`cd datascientest-theme-park`
+`cd datascientest-theme-park`  
 `docker-compose up -d`
 
 ## Check api routes
