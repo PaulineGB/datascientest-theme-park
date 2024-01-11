@@ -1,7 +1,12 @@
 name: Build and test
 run-name: ${{ github.actor }} / Build and test 🚀
 
-on: [push]
+on:
+  push:
+    branches-ignore:
+    - main
+    - dev
+  workflow_call:
 
 env:
   ARTIFACT_NAME: theme-park-ride-v${{ github.run_id }}.jar

@@ -7,8 +7,12 @@ on:
     - main
 
 jobs:
+  test:
+    uses: ./.github/workflows/build-test.yml
+
   jar-build:
     runs-on: ubuntu-latest
+    needs: test
     env:
       BUILD_DB_HOST: localhost
       BUILD_DB_NAME: themepark
