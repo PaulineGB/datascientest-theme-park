@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} / build, docker push and deploy on dev 🐱
 
 on:
   workflow_run:
-    workflows: [build-test]
+    workflows: [Build and test]
     types:
       - completed
     branches:
