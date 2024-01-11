@@ -2,9 +2,12 @@ name: build, docker push and deploy on dev
 run-name: ${{ github.actor }} / build, docker push and deploy on dev 🐱
 
 on:
-  push:
+  workflow_run:
+    workflows: [build-test]
+    types:
+      - completed
     branches:
-    - dev
+      - dev
 
 jobs:
   jar-build:
