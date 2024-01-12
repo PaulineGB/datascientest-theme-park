@@ -8,6 +8,17 @@ provider "kubernetes" {
   token                  = data.aws_eks_cluster_auth.default.token
 }
 
+locals {  
+  list_aws_auth_user = [
+    for iam_user in var.iam_list:
+    {
+      userarn  = "arn:aws:iam::${var.account_id}:user/${iam_user}"
+      username = "${iam_user}"
+      groups   = ["system:masters"]
+    }
+  ]
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 19.0"
@@ -21,6 +32,9 @@ module "eks" {
   subnet_ids               = var.public_nets
   control_plane_subnet_ids = var.public_nets
 
+  create_kms_key = false
+  attach_cluster_encryption_policy = false
+  cluster_encryption_config = {}
   eks_managed_node_group_defaults = {
     ami_type       = "${var.ami_type}"
     instance_types = ["${var.instance_types}"]
@@ -44,29 +58,7 @@ module "eks" {
   }
   # aws-auth configmap
   manage_aws_auth_configmap = true
-
-  aws_auth_users = [
-    {
-      userarn  = "arn:aws:iam::${var.account_id}:user/${var.user1}"
-      username = "${var.user1}"
-      groups   = ["system:masters"]
-    },
-    {
-      userarn  = "arn:aws:iam::${var.account_id}:user/${var.user2}"
-      username = "${var.user2}"
-      groups   = ["system:masters"]
-    },
-    {
-      userarn  = "arn:aws:iam::${var.account_id}:user/${var.user3}"
-      username = "${var.user3}"
-      groups   = ["system:masters"]
-    },
-    {
-      userarn  = "arn:aws:iam::${var.account_id}:user/${var.user4}"
-      username = "${var.user4}"
-      groups   = ["system:masters"]
-    },
-  ]
+  aws_auth_users = local.list_aws_auth_user
 
   tags = {
     app       = "${var.app}"
@@ -74,9 +66,14 @@ module "eks" {
   }
 }
 
-resource "aws_autoscaling_attachment" "node_group_to_NLB_attachment" {
-  autoscaling_group_name = module.eks.eks_managed_node_groups_autoscaling_group_names[0]
-  lb_target_group_arn    = var.target_group_arn
+resource "aws_iam_role_policy_attachment" "attach_cloudwatch_agent_server_policy" {
+  role = module.eks.eks_managed_node_groups["node-group1"].iam_role_name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "attach_aws_xray_write_only_access_policy" {
+  role = module.eks.eks_managed_node_groups["node-group1"].iam_role_name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess"
 }
 
 provider "helm" {
@@ -91,7 +88,7 @@ resource "kubernetes_namespace" "cert-manager" {
   metadata {
     name = "cert-manager"
   }
-  depends_on = [module.eks]
+#  depends_on = [module.eks]
 }
 
 resource "helm_release" "cert-manager" {
@@ -105,7 +102,7 @@ resource "helm_release" "cert-manager" {
     name  = "installCRDs"
     value = "true"
   }
-  depends_on = [kubernetes_namespace.cert-manager]
+#  depends_on = [kubernetes_namespace.cert-manager]
 }
 
 resource "kubernetes_namespace" "traefik" {
@@ -113,11 +110,11 @@ resource "kubernetes_namespace" "traefik" {
     name = "traefik"
   }
 
-  depends_on = [helm_release.cert-manager]
+#  depends_on = [helm_release.cert-manager]
 }
 
 resource "helm_release" "traefik_ingress" {
-  name      = "traefik-ingress-controller"
+  name      = "traefik"
   namespace = "traefik"
 
   repository = "https://helm.traefik.io/traefik"
@@ -126,7 +123,7 @@ resource "helm_release" "traefik_ingress" {
   values = [
     "${file("./eks/traefik_values.yaml")}"
   ]
-  depends_on = [kubernetes_namespace.traefik]
+#  depends_on = [kubernetes_namespace.traefik]
 }
 
 provider "kubectl" {
@@ -145,10 +142,10 @@ data "template_file" "cluster-issuer" {
 resource "kubectl_manifest" "cluster-issuer" {
   yaml_body = tostring(data.template_file.cluster-issuer.rendered)
 
-  depends_on = [helm_release.cert-manager]
+#  depends_on = [helm_release.cert-manager]
 }
 
-resource "kubernetes_namespace" "dev" {
+/*resource "kubernetes_namespace" "dev" {
   metadata {
     name = "dev"
   }
@@ -160,4 +157,13 @@ resource "kubernetes_namespace" "prod" {
     name = "prod"
   }
   depends_on = [module.eks]
+}*/
+
+resource "kubernetes_namespace" "list_namespace" {
+  for_each = toset(var.namespace)
+  metadata {
+    name = each.key
+  }
+  # depends_on = [module.eks]
 }
+

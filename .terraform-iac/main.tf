@@ -6,11 +6,8 @@ module "EKS" {
   instance_types       = var.instance_types
   ami_type             = var.ami_type
   account_id           = var.account_id
-  user1                = var.user1
-  user2                = var.user2
-  user3                = var.user3
-  user4                = var.user4
-  target_group_arn     = module.network.target_group_arn
+  namespace            = var.namespace
+  iam_list             = var.iam_list
   cluster_issuer_email = var.cluster_issuer_email
 }
 

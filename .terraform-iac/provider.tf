@@ -1,4 +1,12 @@
 terraform {
+  backend "s3" {
+    bucket =  "tprtf"
+    key = "tpriacstate/terraform.tfstate"
+#       region can't be set with variables.tf here, should be set with environment variable AWS_REGION or in this file with "    region = eu-west-3"^M
+    dynamodb_table = "tpr-tfstate-locking"
+    encrypt = true
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -9,11 +17,4 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
-}
-
-backend "s3" {
-  bucket =  "mytprformback"
-  key = "tpriacstate/terraform.tfstate"
-  region = var.aws_region
-  dynamodb_table = "terraform_remote_state_lock"
 }
