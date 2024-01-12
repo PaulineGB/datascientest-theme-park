@@ -88,7 +88,6 @@ resource "kubernetes_namespace" "cert-manager" {
   metadata {
     name = "cert-manager"
   }
-#  depends_on = [module.eks]
 }
 
 resource "helm_release" "cert-manager" {
@@ -102,15 +101,12 @@ resource "helm_release" "cert-manager" {
     name  = "installCRDs"
     value = "true"
   }
-#  depends_on = [kubernetes_namespace.cert-manager]
 }
 
 resource "kubernetes_namespace" "traefik" {
   metadata {
     name = "traefik"
   }
-
-#  depends_on = [helm_release.cert-manager]
 }
 
 resource "helm_release" "traefik_ingress" {
@@ -123,7 +119,6 @@ resource "helm_release" "traefik_ingress" {
   values = [
     "${file("./eks/traefik_values.yaml")}"
   ]
-#  depends_on = [kubernetes_namespace.traefik]
 }
 
 provider "kubectl" {
@@ -142,28 +137,13 @@ data "template_file" "cluster-issuer" {
 resource "kubectl_manifest" "cluster-issuer" {
   yaml_body = tostring(data.template_file.cluster-issuer.rendered)
 
-#  depends_on = [helm_release.cert-manager]
+  depends_on = [helm_release.cert-manager]
 }
-
-/*resource "kubernetes_namespace" "dev" {
-  metadata {
-    name = "dev"
-  }
-  depends_on = [module.eks]
-}
-
-resource "kubernetes_namespace" "prod" {
-  metadata {
-    name = "prod"
-  }
-  depends_on = [module.eks]
-}*/
 
 resource "kubernetes_namespace" "list_namespace" {
   for_each = toset(var.namespace)
   metadata {
     name = each.key
   }
-  # depends_on = [module.eks]
 }
 
